@@ -1,0 +1,20 @@
+{
+  "name": "workplace-envoy-slack",
+  "version": "1.0.0",
+  "description": "envoy notifications in slack",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "author": "Mike Solomon",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "moment": "^2.27.0",
+    "request": "^2.88.2"
+  }
+}
