@@ -169,7 +169,7 @@ module.exports = {
               "emoji": true,
               "text": "View Visitors"
             },
-            "value": "click_me_123"
+            "value": `show_visitors_${report.location.id}`
           }
         }
         // const userInfo = await slack.getUserInfo(invite.attributes.email)

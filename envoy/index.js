@@ -70,9 +70,9 @@ const helpers = {
       })
     })
   },
-  getLocationInvites(token, location) {
+  getLocationInvites(token, locId, location) {
     return new Promise(async (resolve, reject) => {
-      const page = await helpers.getMostRecentInvitesUrl(token, location.id)
+      const page = await helpers.getMostRecentInvitesUrl(token, locId)
 
       const options = {
         'method': 'get',
@@ -111,7 +111,7 @@ module.exports = {
       console.log(activeLocations.length + ' of ' + locations.data.length + ' locations are active')
       let invitePromises = []
       for (location of activeLocations) {
-        invitePromises.push(helpers.getLocationInvites(accessToken, location))
+        invitePromises.push(helpers.getLocationInvites(accessToken, location.id, location))
       }
       Promise.all(invitePromises)
       .then(values => {
