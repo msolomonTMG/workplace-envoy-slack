@@ -37,37 +37,87 @@ app.post('/slack-interactivity', async (req, res) => {
   switch (payload.type) {
     case 'block_actions':
       if (payload.actions[0].value === 'todays_report') {
-        const todaysReport = await envoy.getTodaysReport()
-        console.log('TODAYS REPORT')
-        console.log(todaysReport[0])
-        const blocks = await utilities.createTodaysReportBlocks(todaysReport)
         slack.sendMessage({
           channel: payload.channel.id,
-          text: `*Today's Report*`,
-          blocks: blocks
-        }).then(response => {
-          console.log(response)
-          // res.send(200)
-        }).catch(err => {
-          console.log(err)
-          // res.send(500)
+          text: `:spinner: Loading Today's Report :spinner2:`,
+          blocks: [
+            {
+              "type": "section",
+              "text": {
+        				"type": "mrkdwn",
+        				"text": `:spinner: Loading Today's Report :spinner2:`
+        			}
+            },
+            {
+        			"type": "context",
+        			"elements": [{
+        				"type": "plain_text",
+        				"emoji": true,
+        				"text": "this could take up to a minute"
+        			}]
+      		  }
+          ],
+        })
+        .then(async slackRes => {
+          console.log("SLACK RES")
+          console.log(slackRes)
+          const todaysReport = await envoy.getTodaysReport()
+          console.log('TODAYS REPORT')
+          console.log(todaysReport[0])
+          const blocks = await utilities.createTodaysReportBlocks(todaysReport)
+          slack.updateMessage({
+            channel: payload.channel.id,
+            text: `*Today's Report*`,
+            blocks: blocks,
+            messageTimestamp: slackRes.ts
+          }).then(response => {
+            console.log(response)
+            // res.send(200)
+          }).catch(err => {
+            console.log(err)
+            // res.send(500)
+          })
         })
       } else if (payload.actions[0].value.includes('show_visitors')) {
-        const locId = payload.actions[0].value.split('show_visitors_')[1]
-        const visitorReport = await envoy.getLocationVisitors(locId)
-        console.log('VISITORS REPORT')
-        console.log(visitorReport)
-        const blocks = await utilities.createVisitorReportBlocks(visitorReport)
         slack.sendMessage({
           channel: payload.channel.id,
-          text: `*${visitorReport.location.attributes.name} Visitors Today*`,
-          blocks: blocks
-        }).then(response => {
-          console.log(response)
-          // res.send(200)
-        }).catch(err => {
-          console.log(err)
-          // res.send(500)
+          text: `:spinner: Loading Visitor Report :spinner2:`,
+          blocks: [
+            {
+              "type": "section",
+              "text": {
+        				"type": "mrkdwn",
+        				"text": `:spinner: Loading Visitor Report :spinner2:`
+        			}
+            },
+            {
+        			"type": "context",
+        			"elements": [{
+        				"type": "plain_text",
+        				"emoji": true,
+        				"text": "this could take up to a minute"
+        			}]
+      		  }
+          ],
+        })
+        .then(async slackRes => {
+          const locId = payload.actions[0].value.split('show_visitors_')[1]
+          const visitorReport = await envoy.getLocationVisitors(locId)
+          console.log('VISITORS REPORT')
+          console.log(visitorReport)
+          const blocks = await utilities.createVisitorReportBlocks(visitorReport)
+          slack.updateMessage({
+            channel: payload.channel.id,
+            text: `*${visitorReport.location.attributes.name} Visitors Today*`,
+            blocks: blocks,
+            messageTimestamp: slackRes.ts
+          }).then(response => {
+            console.log(response)
+            // res.send(200)
+          }).catch(err => {
+            console.log(err)
+            // res.send(500)
+          })
         })
       }
       break
