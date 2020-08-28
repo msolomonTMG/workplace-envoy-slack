@@ -152,14 +152,12 @@ module.exports = {
           "type": "divider"
         }
       ]
-      for (const location of todaysReport) {
-        console.log('LOCATioN')
-        console.log(location)
+      for (const report of todaysReport) {
         let locBlock = {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": `*${location.name}*\n${location.location.attributes.city}`
+            "text": `*${report.location.attributes.name}*\n${report.location.attributes.city}`
           },
           "accessory": {
             "type": "button",
@@ -175,11 +173,11 @@ module.exports = {
         // const imgUrl = userInfo.ok ? userInfo.user.profile.image_512 : `https://ui-avatars.com/api/?name=${invite.attributes['full-name']}&background=ef3934&color=fff`
         // invite.profileImg = imgUrl
         blocks.push(locBlock)
-        if (location.invites.length > 0) {
+        if (report.invites.length > 0) {
           console.log('first invite...')
-          console.log(location.invites[0])
+          console.log(report.invites[0])
           let contextElements = []
-          for (const invite of location.invites) {
+          for (const invite of report.invites) {
             console.log('INVITE')
             console.log(JSON.stringify(invite))
             const userName = invite.attributes['full-name']
