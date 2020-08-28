@@ -100,6 +100,28 @@ const helpers = {
 }
 
 module.exports = {
+  getLocationVisitors (locId) {
+    return new Promise(async (resolve, reject) => {
+      const tokenResponse = await helpers.getToken()
+      const accessToken = tokenResponse.access_token
+      const locations = helpers.getLocations(accessToken)
+      const invites = helpers.getLocationInvites(accessToken, locId)
+      Promise.all([locations, invites])
+      .then(values => {
+        const location = values[0].data.find(l => {
+          return l.id === locId
+        })
+        const visitors = values[1].invites
+        return resolve({
+          location: location,
+          visitors: visitors
+        })
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    })
+  },
   getTodaysReport () {
     return new Promise(async (resolve, reject) => {
       const tokenResponse = await helpers.getToken()

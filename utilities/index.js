@@ -138,6 +138,66 @@ const helpers = {
 }
 
 module.exports = {
+  async createVisitorReportBlocks (visitorReport) {
+    return new Promise(async (resolve, reject) => {
+      let blocks = [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": `*${visitorReport.location.attributes.name} Visitors Today*`
+          }
+        },
+        {
+          "type": "divider"
+        }
+      ]
+      for (const visitor of visitorReport.visitors) {
+        const userName = visitor.attributes['full-name']
+        const userInfo = await slack.getUserInfo(visitor.attributes.email)
+        let imgUrl, userLink;
+        if (userInfo.ok) {
+          imgUrl = userInfo.user.profile.image_512
+          userLink = `<https://groupninemedia.slack.com/team/${userInfo.user.id}|${userName}>`
+        } else {
+          imgUrl = `https://ui-avatars.com/api/?name=${userName}&background=ef3934&color=fff`
+          userLink = userName
+        }
+        let description = `*${userLink}*\nPurpose of visit: ${visitor.attributes['user-data']['Purpose of visit']}\n`
+        if (visitor.attributes['user-data']['Your Company']) {
+          description += `Company: ${visitor.attributes['user-data']['Your Company']}\n`
+        }
+        if (visitor.attributes['user-data']['Host']) {
+          description += `Host: ${visitor.attributes['user-data']['Host']}`
+        }
+        blocks.push(
+          {
+      			"type": "section",
+      			"text": {
+      				"type": "mrkdwn",
+      				"text": `${description}`
+      			},
+      			"accessory": {
+      				"type": "image",
+      				"image_url": `${imgUrl}`,
+      				"alt_text": `${userName}`
+      			}
+    		  },
+          // {
+      		// 	"type": "context",
+      		// 	"elements": [
+      		// 		{
+      		// 			"type": "plain_text",
+      		// 			"emoji": true,
+      		// 			"text": `:email: ${visitor.attributes.email}`
+      		// 		}
+      		// 	]
+      		// }
+        )
+      }
+      return resolve(blocks)
+    })
+  },
   async createTodaysReportBlocks (todaysReport) {
     return new Promise (async (resolve, reject) => {
       let blocks = [

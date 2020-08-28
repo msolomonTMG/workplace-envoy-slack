@@ -52,6 +52,23 @@ app.post('/slack-interactivity', async (req, res) => {
           console.log(err)
           // res.send(500)
         })
+      } else if (payload.actions[0].value.includes('show_visitors')) {
+        const locId = payload.actions[0].value.split('show_visitors_')[1]
+        const visitorReport = await envoy.getLocationVisitors(locId)
+        console.log('VISITORS REPORT')
+        console.log(visitorReport)
+        const blocks = await utilities.createVisitorReportBlocks(visitorReport)
+        slack.sendMessage({
+          channel: payload.channel.id,
+          text: `*${visitorReport.location.attributes.name} Visitors Today*`,
+          blocks: blocks
+        }).then(response => {
+          console.log(response)
+          // res.send(200)
+        }).catch(err => {
+          console.log(err)
+          // res.send(500)
+        })
       }
       break
     default:
