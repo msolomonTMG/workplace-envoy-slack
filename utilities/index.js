@@ -153,13 +153,16 @@ module.exports = {
         }
       ]
       for (const report of todaysReport) {
+        const hasInvites = report.invites.length > 0
         let locBlock = {
           "type": "section",
           "text": {
             "type": "mrkdwn",
             "text": `*${report.location.attributes.name}*\n${report.location.attributes.city}`
-          },
-          "accessory": {
+          }
+        }
+        if (hasInvites) {
+          locBlock["accessory"] = {
             "type": "button",
             "text": {
               "type": "plain_text",
@@ -173,22 +176,30 @@ module.exports = {
         // const imgUrl = userInfo.ok ? userInfo.user.profile.image_512 : `https://ui-avatars.com/api/?name=${invite.attributes['full-name']}&background=ef3934&color=fff`
         // invite.profileImg = imgUrl
         blocks.push(locBlock)
-        if (report.invites.length > 0) {
+        if (hasInvites) {
           console.log('first invite...')
           console.log(report.invites[0])
           let contextElements = []
-          for (const invite of report.invites) {
+          const inviteContextLimit = 9
+          for (const [i, invite] of report.invites.entries()) {
+            console.log("i: " + i)
             console.log('INVITE')
             console.log(JSON.stringify(invite))
-            const userName = invite.attributes['full-name']
-            const userInfo = await slack.getUserInfo(invite.attributes.email)
-            const imgUrl = userInfo.ok ? userInfo.user.profile.image_512 : `https://ui-avatars.com/api/?name=${userName}&background=ef3934&color=fff`
-            contextElements.push({
-              "type": "image",
-					    "image_url": imgUrl,
-					    "alt_text": userName
-            })
+            if (i < inviteContextLimit) {
+              const userName = invite.attributes['full-name']
+              const userInfo = await slack.getUserInfo(invite.attributes.email)
+              const imgUrl = userInfo.ok ? userInfo.user.profile.image_512 : `https://ui-avatars.com/api/?name=${userName}&background=ef3934&color=fff`
+              contextElements.push({
+                "type": "image",
+                "image_url": imgUrl,
+                "alt_text": userName
+              })
+            }
           }
+          contextElements.push({
+            "type": "mrkdwn",
+            "text": `${report.invites.length} visitors`
+          })
           blocks.push({
             "type": "context",
             "elements": contextElements
