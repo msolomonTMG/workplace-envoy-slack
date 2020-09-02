@@ -14,7 +14,13 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+let payloadsProcessed= []
+
 app.post('/', async (req, res) => {
+  // dont send duplicate slack messages if we've seen this payload already
+  if (payloadsProcessed.includes(req.body.payload.id) {
+    return res.send(200)
+  }
   const blocks = await utilities.createRegistrationMessageBlocks(req.body)
   console.log(JSON.stringify(blocks))
   slack.sendMessage({
@@ -23,6 +29,7 @@ app.post('/', async (req, res) => {
     blocks: blocks
   }).then(response => {
     console.log(response)
+    payloadsProcessed.push(req.body.payload.id)
     res.send(200)
   }).catch(err => {
     console.log(err)
