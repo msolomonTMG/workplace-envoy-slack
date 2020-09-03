@@ -22,7 +22,6 @@ app.post('/', async (req, res) => {
     return res.send(200)
   }
   const blocks = await utilities.createRegistrationMessageBlocks(req.body)
-  console.log(JSON.stringify(blocks))
   slack.sendMessage({
     channel: process.env.SLACK_CHANNEL,
     text: `New Envoy Registration`,
@@ -63,11 +62,7 @@ app.post('/slack-interactivity', async (req, res) => {
           ],
         })
         .then(async slackRes => {
-          console.log("SLACK RES")
-          console.log(slackRes)
           const todaysReport = await envoy.getTodaysReport()
-          console.log('TODAYS REPORT')
-          console.log(todaysReport[0])
           const blocks = await utilities.createTodaysReportBlocks(todaysReport)
           slack.updateMessage({
             channel: payload.channel.id,
