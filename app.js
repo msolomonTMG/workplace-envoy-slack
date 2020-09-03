@@ -28,18 +28,15 @@ app.post('/', async (req, res) => {
     text: `New Envoy Registration`,
     blocks: blocks
   }).then(response => {
-    console.log(response)
     payloadsProcessed.push(req.body.payload.id)
     res.send(200)
   }).catch(err => {
-    console.log(err)
     res.send(500)
   })
 })
 
 app.post('/slack-interactivity', async (req, res) => {
   const payload = JSON.parse(req.body.payload)
-  console.log('payload', JSON.stringify(payload))
 
   switch (payload.type) {
     case 'block_actions':
@@ -77,12 +74,6 @@ app.post('/slack-interactivity', async (req, res) => {
             text: `*Today's Report*`,
             blocks: blocks,
             messageTimestamp: slackRes.ts
-          }).then(response => {
-            console.log(response)
-            // res.send(200)
-          }).catch(err => {
-            console.log(err)
-            // res.send(500)
           })
         })
       } else if (payload.actions[0].value.includes('show_visitors')) {
@@ -110,20 +101,12 @@ app.post('/slack-interactivity', async (req, res) => {
         .then(async slackRes => {
           const locId = payload.actions[0].value.split('show_visitors_')[1]
           const visitorReport = await envoy.getLocationVisitors(locId)
-          console.log('VISITORS REPORT')
-          console.log(visitorReport)
           const blocks = await utilities.createVisitorReportBlocks(visitorReport)
           slack.updateMessage({
             channel: payload.channel.id,
             text: `*${visitorReport.location.attributes.name} Visitors Today*`,
             blocks: blocks,
             messageTimestamp: slackRes.ts
-          }).then(response => {
-            console.log(response)
-            // res.send(200)
-          }).catch(err => {
-            console.log(err)
-            // res.send(500)
           })
         })
       }
@@ -134,31 +117,6 @@ app.post('/slack-interactivity', async (req, res) => {
   // slack will post OK in the channel if you just return 200
   res.setHeader('Content-Type', 'application/json');
   res.status(200).send(':spinner::sunglasses::spinner2:')
-})
-
-app.post('/slack-menu-options', function (req, res) {
-  const payload = JSON.parse(req.body.payload)
-  console.log(payload.type)
-  switch (payload.type) {
-    case 'block_suggestion':
-      utilities.getPossibleJiraAssignees(payload.container.message_ts, payload.value)
-      .then(users => {
-        let options = users.map(user => {
-          return {
-            text: {
-              type: 'plain_text',
-              text: user.displayName
-            },
-            value: user.name
-          }
-        })
-        res.status(200)
-        res.json({ options: options })
-      })
-      break
-    default:
-      console.log(`Got a payload type that we didnt prepare for: ${payload.type}`)
-  }
 })
 
 app.listen(app.get('port'), function() {
