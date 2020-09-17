@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-let payloadsProcessed= []
+let payloadsProcessed = []
 
 app.post('/', async (req, res) => {
   // dont send duplicate slack messages if we've seen this payload already
