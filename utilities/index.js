@@ -1,6 +1,7 @@
 const
   slack = require('../slack'),
   envoy = require('../envoy'),
+  airtable = require('../airtable'),
   request = require('request'),
   moment = require('moment');
 
@@ -130,9 +131,8 @@ module.exports = {
     return new Promise (async (resolve, reject) => {
       const userName = registration.payload.attributes['full-name']
       const userInfo = await slack.getUserInfo(registration.payload.attributes.email)
-      console.log('USER INFO')
-      console.log(userInfo)
-      console.log('Show Avatar is:', userInfo.ok )
+      const userIsTrained = await airtable.receivedCovidTraining(registration.payload.attributes.email)
+
       let imgUrl, userLink;
       
       if (userInfo.ok) {
@@ -143,7 +143,7 @@ module.exports = {
         userLink = userName
       }
       
-      return resolve([
+      let registrationBlocks = [
         {
           "type": "section",
           "text": {
@@ -177,7 +177,34 @@ module.exports = {
     				}
     			]
     		}
-      ])
+      ]
+      
+      let trainingBlock
+      if (userIsTrained) {
+        trainingBlock = {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": `:white_check_mark: ${userName} is trained on COVID-19 safety protocols`
+            }
+          ]
+        }
+      } else {
+        trainingBlock = {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": ":warning: No record of COVID-19 safety training"
+            }
+          ]
+        }
+      }
+      
+      registrationBlocks.push(trainingBlock)
+      
+      return resolve(registrationBlocks)
     })
   }
 }
