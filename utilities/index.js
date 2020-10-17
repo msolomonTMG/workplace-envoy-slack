@@ -2,6 +2,7 @@ const
   slack = require('../slack'),
   envoy = require('../envoy'),
   airtable = require('../airtable'),
+  jira = require('../jira'),
   request = require('request'),
   moment = require('moment');
 
@@ -132,6 +133,7 @@ module.exports = {
       const userName = registration.payload.attributes['full-name']
       const userInfo = await slack.getUserInfo(registration.payload.attributes.email)
       const userIsTrained = await airtable.receivedCovidTraining(registration.payload.attributes.email)
+      const recentTickets = await jira.getRecentTickets(registration.payload.attributes.email)
 
       let imgUrl, userLink;
       
@@ -141,6 +143,15 @@ module.exports = {
       } else {
         imgUrl = `https://ui-avatars.com/api/?name=${userName}&background=ef3934&color=fff`
         userLink = userName
+      }
+      
+      let regData = `*Where:*\n${registration.meta.location.attributes.name}\n\n*When:*\n${moment(registration.payload.attributes['expected-arrival-time']).format('LL')}`
+      
+      if (recentTickets && recentTickets.length > 0) {
+        regData += `\n\n*Recent Workplace Tickets:*\n`
+        for (const ticket of recentTickets) {
+          regData += `<${process.env.JIRA_URL}/browse/${ticket.key}|${ticket.key}> - ${ticket.fields.summary}\n`
+        }
       }
       
       let registrationBlocks = [
@@ -155,7 +166,7 @@ module.exports = {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": `*Where:*\n${registration.meta.location.attributes.name}\n\n*When:*\n${moment(registration.payload.attributes['expected-arrival-time']).format('LL')}`
+            "text": regData
           },
           "accessory": {
             "type": "image",
