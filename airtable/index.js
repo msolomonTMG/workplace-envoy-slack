@@ -3,7 +3,6 @@ const Airtable = require('airtable')
 const helpers = {
   getRecordsFromView (data) {
     return new Promise((resolve, reject) => {
-      console.log('getting records from view...', data)
       const base = new Airtable({
         apiKey: process.env.AIRTABLE_API_KEY
       }).base(data.base)
