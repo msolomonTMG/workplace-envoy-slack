@@ -133,7 +133,8 @@ module.exports = {
       const userName = registration.payload.attributes['full-name']
       const userInfo = await slack.getUserInfo(registration.payload.attributes.email)
       const userIsTrained = await airtable.receivedCovidTraining(registration.payload.attributes.email)
-      const recentTickets = await jira.getRecentTickets(registration.payload.attributes.email)
+      const recentJiraInfo = await jira.getRecentTickets(registration.payload.attributes.email)
+      const recentTickets = recentJiraInfo.issues
 
       let imgUrl, userLink;
       
@@ -148,10 +149,12 @@ module.exports = {
       let regData = `*Where:*\n${registration.meta.location.attributes.name}\n\n*When:*\n${moment(registration.payload.attributes['expected-arrival-time']).format('LL')}`
       
       if (recentTickets && recentTickets.length > 0) {
-        regData += `\n\n*Recent Workplace Tickets:*\n`
-        for (const ticket of recentTickets) {
-          regData += `<${process.env.JIRA_URL}/browse/${ticket.key}|${ticket.key}> - ${ticket.fields.summary}\n`
-        }
+        regData += `\n\n*Has ${recentTickets.length} Recent Workplace Tickets:*\n`
+        regData += `Workplace Only: <${process.env.JIRA_URL}/issues/?jql=${encodeURI(recentJiraInfo.jql)}|View Here>\n`
+        // hide due to confidentiality
+        // for (const ticket of recentTickets) {
+        //   regData += `<${process.env.JIRA_URL}/browse/${ticket.key}|${ticket.key}> - ${ticket.fields.summary}\n`
+        // }
       }
       
       let registrationBlocks = [

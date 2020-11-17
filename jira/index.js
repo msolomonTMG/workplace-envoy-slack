@@ -39,6 +39,7 @@ const helpers = {
       }
       request(options, function(err, res, body) {
         if (err) { return reject(err) }
+        console.log("NUM ISsUeS:", JSON.parse(body).issues.length)
         const issues = JSON.parse(body).issues
         return resolve(issues)
       })
@@ -55,6 +56,9 @@ module.exports = {
     }
     jql += `text ~ "${email}") and createdDate > endOfDay(-7)`
     const issues = await helpers.searchIssues(jql)
-    return issues
+    return {
+      issues: issues,
+      jql: jql
+    }
   }
 }
