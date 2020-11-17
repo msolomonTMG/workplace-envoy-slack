@@ -55,6 +55,9 @@ module.exports = {
     }
     jql += `text ~ "${email}") and createdDate > endOfDay(-7)`
     const issues = await helpers.searchIssues(jql)
-    return issues
+    return {
+      issues: issues,
+      jql: jql
+    }
   }
 }
