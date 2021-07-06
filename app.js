@@ -45,7 +45,7 @@ app.post('/', async (req, res) => {
   if (!employeeCanVoluntarilyReturn) {
     slack.sendMessage({
       channel: 'C0271TMHC22',
-      text: `${employee.Name} (${employee.email}) is attempting to come to ${req.body.meta.location.attributes.name} but they are not eligible for voluntary returns`,
+      text: `${employee.Name} (${employee.Email}) is attempting to come to ${req.body.meta.location.attributes.name} but they are not eligible for voluntary returns`,
     }).then(response => {
       console.log('sent slack msg', JSON.stringify(response))
       return res.send(200)
