@@ -23,17 +23,12 @@ app.post('/', async (req, res) => {
     return res.send(200)
   }
   const blocks = await utilities.createRegistrationMessageBlocks(req.body)
-  slack.sendMessage({
+  await slack.sendMessage({
     channel: process.env.SLACK_CHANNEL,
     text: `New Envoy Registration`,
     blocks: blocks
-  }).then(response => {
-    payloadsProcessed.push(req.body.payload.id)
-    // res.send(200)
-  }).catch(err => {
-    console.log('err', err)
-    // res.send(500)
   })
+  payloadsProcessed.push(req.body.payload.id)
 
   // send a private slack if someone is not eligible for voluntary returns but is showing up to an office with returns
   const officesWithReturns = ['568 Broadway']
