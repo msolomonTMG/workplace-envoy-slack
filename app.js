@@ -23,24 +23,22 @@ app.post('/', async (req, res) => {
     return res.send(200)
   }
   const blocks = await utilities.createRegistrationMessageBlocks(req.body)
-  slack.sendMessage({
+  await slack.sendMessage({
     channel: process.env.SLACK_CHANNEL,
     text: `New Envoy Registration`,
     blocks: blocks
-  }).then(response => {
-    payloadsProcessed.push(req.body.payload.id)
-    // res.send(200)
-  }).catch(err => {
-    console.log('err', err)
-    // res.send(500)
   })
+  payloadsProcessed.push(req.body.payload.id)
 
   // send a private slack if someone is not eligible for voluntary returns but is showing up to an office with returns
   const officesWithReturns = ['568 Broadway']
   const isComingToOfficeWithReturns = officesWithReturns.includes(req.body.meta.location.attributes.name)
+  console.log('req.body.meta.location.attributes.name', req.body.meta.location.attributes.name)
+  console.log('isComingToOfficeWithReturns', isComingToOfficeWithReturns)
   if (!isComingToOfficeWithReturns) return res.send(200)
 
   const voluntaryReturnAccess = await airtable.eligibleForVoluntaryReturns(req.body.payload.attributes.email)
+  console.log('voluntaryReturnAccess', JSON.stringify(voluntaryReturnAccess))
   const employeeCanVoluntarilyReturn = voluntaryReturnAccess.eligible
   const employee = voluntaryReturnAccess.employee
   
@@ -49,8 +47,10 @@ app.post('/', async (req, res) => {
       channel: 'C0271TMHC22',
       text: `${employee.Name} (${employee.email}) is attempting to come to ${req.body.meta.location.attributes.name} but they are not eligible for voluntary returns`,
     }).then(response => {
+      console.log('sent slack msg', JSON.stringify(response))
       return res.send(200)
     }).catch(err => {
+      console.log('got an error sending slack msg', JSON.stringify(err))
       return res.send(500)
     })
   }
