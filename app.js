@@ -3,6 +3,7 @@ const
   bodyParser = require('body-parser'),
   envoy = require('./envoy'),
   slack = require('./slack'),
+  airtable = require('./airtable'),
   utilities = require('./utilities'),
   request = require('request');
 
