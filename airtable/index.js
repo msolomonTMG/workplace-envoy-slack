@@ -50,5 +50,32 @@ module.exports = {
         return resolve(false)
       }
     })
+  },
+  async eligibleForVoluntaryReturns (email) {
+    return new Promise(async (resolve, reject) => {
+      const employeeResults = await helpers.getRecordsFromView({
+        base: 'appBVp8sxaqI2NZ6j',
+        table: 'Employees',
+        view: 'All Employees',
+        filter: `{Email} = "${email}"`
+      })
+      const employee = employeeResults.records[0]
+      if (!employee) {
+        return resolve({
+          eligible: false,
+          employee: null
+        })
+      } else if (employee.fields['Eligible For Voluntary Returns']) {
+        return resolve({
+          eligible: true,
+          employee: employee.fields
+        })
+      } else {
+        return resolve({
+          eligible: false,
+          employee: employee.fields
+        })
+      }
+    })
   }
 }

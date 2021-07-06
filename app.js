@@ -28,10 +28,31 @@ app.post('/', async (req, res) => {
     blocks: blocks
   }).then(response => {
     payloadsProcessed.push(req.body.payload.id)
-    res.send(200)
+    // res.send(200)
   }).catch(err => {
-    res.send(500)
+    console.log('err', err)
+    // res.send(500)
   })
+
+  // send a private slack if someone is not eligible for voluntary returns but is showing up to an office with returns
+  const officesWithReturns = ['568 Broadway']
+  const isComingToOfficeWithReturns = officesWithReturns.includes(req.body.meta.location.attributes.name)
+  if (!isComingToOfficeWithReturns) return res.send(200)
+
+  const voluntaryReturnAccess = await airtable.eligibleForVoluntaryReturns(req.body.payload.attributes.email)
+  const employeeCanVoluntarilyReturn = voluntaryReturnAccess.eligible
+  const employee = voluntaryReturnAccess.employee
+  
+  if (!employeeCanVoluntarilyReturn) {
+    slack.sendMessage({
+      channel: 'C0271TMHC22',
+      text: `${employee.Name} (${employee.email}) is attempting to come to ${req.body.meta.location.attributes.name} but they are not eligible for voluntary returns`,
+    }).then(response => {
+      return res.send(200)
+    }).catch(err => {
+      return res.send(500)
+    })
+  }
 })
 
 app.post('/slack-interactivity', async (req, res) => {
