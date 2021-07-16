@@ -31,7 +31,7 @@ app.post('/', async (req, res) => {
   payloadsProcessed.push(req.body.payload.id)
 
   // send a private slack if someone is not eligible for voluntary returns but is showing up to an office with returns
-  const officesWithReturns = ['568 Broadway']
+  const officesWithReturns = ['568 Broadway Voluntary Returns']
   const isComingToOfficeWithReturns = officesWithReturns.includes(req.body.meta.location.attributes.name)
   console.log('req.body.meta.location.attributes.name', req.body.meta.location.attributes.name)
   console.log('isComingToOfficeWithReturns', isComingToOfficeWithReturns)
@@ -46,6 +46,15 @@ app.post('/', async (req, res) => {
     slack.sendMessage({
       channel: 'C0271TMHC22',
       text: `${employee.Name} (${employee.Email}) is attempting to come to ${req.body.meta.location.attributes.name} but they are not eligible for voluntary returns`,
+      blocks: [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": `${employee.Name} (${employee.Email}) is attempting to come to ${req.body.meta.location.attributes.name} but they are not eligible for voluntary returns`
+          }
+        },
+      ]
     }).then(response => {
       console.log('sent slack msg', JSON.stringify(response))
       return res.send(200)
